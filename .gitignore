@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.env
+.ipynb_checkpoints/
+venv/
+env/
+*.log
+*.xlsx
+.idea/
+.vscode/
+*.tmp
+*.temp
