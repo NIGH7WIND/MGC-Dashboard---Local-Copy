@@ -91,24 +91,98 @@ h1 {
 
 .analyze-btn {
   flex-basis: 30%;
-  background-color: #4c7cff;
+  background: linear-gradient(
+    45deg,
+    #00c6ff,
+    #0072ff
+  ); /* Clean neon blue gradient */
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 25px;
   cursor: pointer;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 5px rgba(0, 198, 255, 0.7), 0 0 0px rgba(0, 198, 255, 0.5),
+    0 0 5px rgba(0, 114, 255, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+.analyze-btn:hover {
+  box-shadow: 0 0 5px rgba(0, 198, 255, 1), 0 0 15px rgba(0, 198, 255, 0.8),
+    0 0 10px rgba(0, 114, 255, 0.8);
+}
+
+.analyze-btn.analyzing {
+  box-shadow: 0 0 5px rgba(0, 198, 255, 1), 0 0 10px rgba(0, 198, 255, 0.8),
+    0 0 15px rgba(0, 114, 255, 0.8);
+  animation: pulse 1.5s infinite; /* Add a pulse animation */
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 198, 255, 0.7), 0 0 10px rgba(0, 198, 255, 0.5),
+      0 0 5px rgba(0, 114, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(0, 198, 255, 1), 0 0 10px rgba(0, 198, 255, 0.8),
+      0 0 10px rgba(0, 114, 255, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(0, 198, 255, 0.7), 0 0 10px rgba(0, 198, 255, 0.5),
+      0 0 20px rgba(0, 114, 255, 0.5);
+  }
+}
+
+.generate-btn {
+  flex-basis: 30%;
+  background: linear-gradient(
+    45deg,
+    #ff4c4c,
+    #ff0000
+  ); /* Clean neon red gradient */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 0 0px rgba(255, 76, 76, 0.7), 0 0 5px rgba(255, 76, 76, 0.5),
+    0 0 5px rgba(255, 0, 0, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+.generate-btn:hover {
+  box-shadow: 0 0 5px rgba(255, 76, 76, 1), 0 0 10px rgba(255, 76, 76, 0.8),
+    0 0 10px rgba(255, 0, 0, 0.8);
+}
+
+.generate-btn.generating {
+  background: linear-gradient(
+    45deg,
+    #584cff,
+    #ff003c
+  );
+  box-shadow: 0 0 5px rgb(76, 118, 255), 0 0 5px rgba(128, 25, 255, 0.8),
+    0 0 15px rgba(67, 98, 255, 0.8);
+  animation: pulse-red 1.5s infinite; /* Add a pulse animation */
+}
+
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 5px rgba(76, 255, 145, 0.7), 0 0 10px rgba(255, 61, 61, 0.5),
+      0 0 15px rgba(0, 4, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 10px rgb(76, 145, 255), 0 0 15px rgba(76, 255, 171, 0.8),
+      0 0 5px rgba(255, 33, 33, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(76, 255, 174, 0.7), 0 0 5px rgba(255, 42, 42, 0.5),
+      0 0 10px rgba(13, 0, 255, 0.5);
+  }
 }
 
 #time-period:hover {
   transition: background-color 0.3s;
   box-shadow: 0px 2px 4px rgba(0.1, 0.1, 0.2, 0.3);
-}
-
-.analyze-btn:hover {
-  transition: background-color 0.3s;
-  background-color: #235dff;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0.2, 0.3);
 }
 
 .company-info {
@@ -121,7 +195,7 @@ h1 {
 
 .company-info-flex {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -131,9 +205,17 @@ h1 {
 }
 
 .company-name {
+  display: flex;
+  justify-content: space-between;
   font-size: 14px;
   color: #888;
   padding-bottom: 5px;
+}
+
+.companyname {
+  font-size: 18px;
+  font-weight: bold;
+  color: #888;
 }
 
 .company-value {
@@ -172,7 +254,8 @@ h1 {
 }
 
 .chart {
-  min-height: 200px;
+  width: 100%;
+  min-height: 400px;
   justify-content: center;
   align-items: center;
   /* Chart styling will be handled by JavaScript */
@@ -308,8 +391,99 @@ h1 {
   transition: opacity 0.3s;
 }
 
+/* Advanced Loading animation  */
+.loader-container {
+  text-align: center;
+  margin: 20px;
+  padding: 40px;
+  background-color: white;
+  border-radius: 12px;
+}
+
+.loader-icon {
+  font-size: 5rem;
+  color: #3b82f6;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.loader-icon.pulse-2 {
+  animation: pulse-2 1.5s infinite;
+}
+
+.loader-text {
+  margin-bottom: 20px;
+}
+
+.loader-text h3 {
+  font-size: 1.5rem;
+  color: #1e40af;
+  margin-bottom: 10px;
+  animation: bounce 1s infinite;
+}
+
+.progress-container {
+  margin-top: 20px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #3b82f6;
+  transition: width 0.3s ease;
+  animation: pulse-2 1.5s infinite;
+}
+
+.stage-progress-bar {
+  margin-top: 10px;
+  height: 5px;
+}
+
+.stage-progress-bar-fill {
+  height: 100%;
+  background-color: #10b981;
+  transition: width 0.3s ease;
+  animation: pulse-2 1.5s infinite;
+}
+
+@keyframes pulse-2 {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 /* Basic spinner styles */
 .loading {
+  width: 100%;
   position: absolute;
   top: 50%;
   left: 50%;

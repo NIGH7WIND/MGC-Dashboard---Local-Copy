@@ -1,6 +1,7 @@
 import pandas as pd
 import asyncio
 import aiohttp
+import time
 from trafilatura import extract
 import logging
 
@@ -85,19 +86,25 @@ def extract_content_sync(urls):
     return asyncio.run(extract_content_for_multiple_urls(urls))
 
 
-# # Example usage
+# Example usage
 
-# if __name__ == "__main__":
-#     # Sample list of URLs (replace with actual URLs you want to process)
-#     df = pd.read_excel(r"E:\Intern\Minerva\Web Scrapping\TATA Motors_LinksResolved.xlsx")
-#     df = df.dropna()
-#     urls = df["ResolvedLink"].tolist()
+if __name__ == "__main__":
+    # Sample list of URLs (replace with actual URLs you want to process)
+    df = pd.read_excel(r"E:\Intern\Minerva\Web Scrapping\TATA Motors_LinksResolved.xlsx")
+    df = df.dropna()
+    urls = df["ResolvedLink"].tolist()
+    tot_rows = len(urls)
+    
+    start_time = time.time()
+    # Synchronously extract content from multiple URLs
+    extracted_content = extract_content_sync(urls)
 
-#     # Synchronously extract content from multiple URLs
-#     extracted_content = extract_content_sync(urls)
+    failed_count = sum(1 for value in extracted_content.values() if value is None)
 
-#     # Update the DataFrame with the extracted content
-#     df["ExtractedContent"] = df["ResolvedLink"].map(extracted_content)
+    # Update the DataFrame with the extracted content
+    df["ExtractedContent"] = df["ResolvedLink"].map(extracted_content)
 
-#     # Print the updated DataFrame
-#     print(df.head())
+    print("Total time taken for content extraction: ", time.time() - start_time, "s")
+    print("Total no of failed links: ", failed_count, "out of ", tot_rows)
+    # Print the updated DataFrame
+    # print(df.head())

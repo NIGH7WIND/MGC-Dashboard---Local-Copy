@@ -5,7 +5,7 @@ import time
 import pandas as pd
 
 class GoogleNewsLinkResolver:
-    def __init__(self, max_concurrent_tasks=10, timeout=5, max_wait=5):
+    def __init__(self, max_concurrent_tasks=10, timeout=30, max_wait=30):
         """
         Initialize the link resolver with configurable parameters.
         
@@ -37,13 +37,12 @@ class GoogleNewsLinkResolver:
                 start_time = asyncio.get_event_loop().time()
                 
                 while redirected_url.startswith('https://news.google.com'):
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(0.1)
                     redirected_url = page.url
                     
                     if asyncio.get_event_loop().time() - start_time > self.max_wait:
                         break
                 self.logger.info(f"Resolved link: {redirected_url}")
-                await browser.close()
                 return redirected_url
         except Exception as e:
             self.logger.error(f"Error resolving link: {e}")
@@ -79,18 +78,18 @@ class GoogleNewsLinkResolver:
         """
         return asyncio.run(self.resolve_links(links))
 
-# # Example usage
-# async def main():
-#     df = pd.read_excel(r"E:\Intern\Minerva\LLM API\TATA Motors.xlsx")
-#     links = list(df["Link"][:100])
+# Example usage
+async def main():
+    df = pd.read_excel(r"E:\Intern\Minerva\LLM API\TATA Motors.xlsx")
+    links = list(df["Link"][:500])
     
-#     start_time = time.time()
-#     resolver = GoogleNewsLinkResolver(max_concurrent_tasks=20)
-#     resolved_links = await resolver.resolve_links(links)
+    start_time = time.time()
+    resolver = GoogleNewsLinkResolver(max_concurrent_tasks=20)
+    resolved_links = await resolver.resolve_links(links)
     
-#     for original_link, resolved_link in resolved_links.items():
-#         print(f"Resolved: {resolved_link}")
-#     print("Total time taken: ", time.time()-start_time)
-# # If running as a script
-# if __name__ == "__main__":
-#     asyncio.run(main())
+    for original_link, resolved_link in resolved_links.items():
+        print(f"Resolved: {resolved_link}")
+    print("Total time taken: ", time.time()-start_time)
+# If running as a script
+if __name__ == "__main__":
+    asyncio.run(main())

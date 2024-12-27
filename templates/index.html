@@ -15,20 +15,41 @@
         <button class="analyze-btn" onclick="analyzeSentiment()"><i class="fas fa-chart-pie"></i> Analyze Sentiment</button>
     </div>
     <div class="company-info">
-        <div id="company-name-display" class="company-name">Company Name</div>
+        <div id='today-date' class="company-name">Today</div>
         <div class="company-info-flex">
-            <div id='company-value-display' class="company-value">--.--K<span class="positive">-%</span></div>
-            <div id='today-date' class="date">Today</div>
+            <div id="company-name-display" class="companyname">Company Name</div>
+            <button class="generate-btn" onclick="generateReport()" disabled style="display: none;">Generate Report</button>
         </div>
     </div>
     <div class="dashboard-footer">
         <div class="sentiment-chart">
             <h2>Historical Sentiment Scores <span id="date-range" class="date-range">Date Range</span></h2>
-            <div id=chart-display class="chart" style="width: 100%; height: 100%;">
+            <div id="chart-display" class="chart">
                 <!-- Loading Animation -->
                 <div id="loading" class="loading" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Loading...</p>
+                    <div class="loader-container">
+                        <div id="loaderIcon" class="loader-icon pulse-2">🔗</div>
+                        <div class="loader-text">
+                            <h3 id="stageText">Scraping Links</h3>
+                            <p id="stageDescription">Collecting web resources...</p>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Overall Progress</span>
+                                <span id="overallProgressText">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="overallProgressBar" class="progress-bar-fill"></div>
+                            </div>
+                            <div class="progress-label" style="margin-top: 15px;">
+                                <span>Current Stage Progress</span>
+                                <span id="stageProgressText">0%</span>
+                            </div>
+                            <div class="progress-bar stage-progress-bar">
+                                <div id="stageProgressBar" class="stage-progress-bar-fill"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Chart will be inserted here by JavaScript -->
             </div>

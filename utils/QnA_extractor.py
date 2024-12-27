@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import json
 
 def extract_qna_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -79,6 +80,41 @@ def process_excel_file(file_path: str, output_dir: str = None) -> None:
 
     except Exception as e:
         print(f"Error processing file {file_path}: {e}")
+
+import json
+import pandas as pd
+
+def convert_df_to_json(df: pd.DataFrame) -> str:
+    # Initialize an empty dictionary to store the structured data
+    structured_data = {}
+    current_question = None
+    question_counter = 1  # Counter for numbering the questions
+
+    # Iterate through each row of the DataFrame
+    for index, row in df.iterrows():
+        if pd.notna(row['Question']) and row['Question'].strip() != "":  # Check if the row has a new question
+            # Create a key like "Q1", "Q2", ..., for each question
+            question_key = f"Q{question_counter}"
+            structured_data[question_key] = {
+                "question": row['Question'],  # Store the full question
+                "rows": []  # Initialize an empty list for rows
+            }
+            current_question = question_key  # Update the current question key
+            question_counter += 1  # Increment the counter
+        elif current_question is not None:  # If no new question, add data to the current question's "rows"
+            # Append the row data to the current question's list of rows
+            structured_data[current_question]["rows"].append({
+                "Date": row['Date'],
+                "Link": row['Link'],
+                "Answer": row['Answer']
+            })
+
+    # Convert the structured dictionary to a JSON string with indentation
+    json_result = json.dumps(structured_data)  # Pretty print with indentation
+
+    return json_result  # Returning the JSON string
+
+
 
 # # Example usage
 # file_path = r"E:\Intern\Minerva\LLM API\new\gemini_debugging_output.xlsx"

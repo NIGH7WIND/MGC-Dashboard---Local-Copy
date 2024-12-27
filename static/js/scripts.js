@@ -8,6 +8,14 @@ function analyzeSentiment() {
     const companyName = document.getElementById('company-name').value.trim();
     const timePeriod = document.getElementById('time-period').value;
 
+    updateLoader();
+
+    // analyzing animation
+    const analyzeButton = document.querySelector('.analyze-btn');
+    analyzeButton.innerText = 'Analyzing...';
+    analyzeButton.classList.add('analyzing');
+    analyzeButton.disabled = true;
+
     // Show loading animation
     document.getElementById('loading').style.display = 'block';
     document.getElementById('gauge-loading').style.display = 'block';
@@ -26,6 +34,20 @@ function analyzeSentiment() {
     .then(response => {
         const companyName = response.companyName;
         const sentimentData = JSON.parse(response.data);
+
+        // Reset the analysebutton style
+        analyzeButton.innerText = 'Analyze Sentiment';
+        analyzeButton.classList.remove('analyzing');
+        analyzeButton.disabled = false;
+
+
+        // Enable the "Generate Report" button once the sentiment data is received
+        const generateReportButton = document.querySelector('.generate-btn');
+        generateReportButton.disabled = false;
+        generateReportButton.style.display = 'block';
+        generateReportButton.onclick = function() {
+            generateReport(companyName, sentimentData);
+        };
 
         // Find the highest positive_sentiment and highest negative_sentiment along with their corresponding date
         const highestPositive = sentimentData.reduce((max, current) => max.positive_sentiment > current.positive_sentiment ? max : current);
@@ -253,13 +275,58 @@ function analyzeSentiment() {
     })
     .finally(() => {
         // Hide loading animation after chart is rendered
+        clearLoader();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('gauge-loading').style.display = 'none';
     })
     .catch(error => {
         console.error('Error:', error);
+        
+        // re-enable  
+        analyzeButton.innerText = 'Analyse Sentiment';
+        analyzeButton.classList.remove('analyzing');
+        analyzeButton.disabled = false;
+
         document.getElementById('loading').style.display = 'none'; // Ensure to hide animation on error
         document.getElementById('gauge-loading').style.display = 'none';
+        clearLoader();
+    });
+}
+
+// Function to handle report generation
+function generateReport(companyName, sentimentData) {
+    
+    // Generating animation
+    const generateButton = document.querySelector('.generate-btn');
+    generateButton.innerText = 'Generating...';
+    generateButton.classList.add('generating'); // Add the generating class
+    generateButton.disabled = true;
+
+    fetch('/generate-report', {
+        method: 'POST',
+        body: JSON.stringify({ companyName, analysedData: sentimentData }),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.blob())  // Expect the response as a blob (HTML file)
+    .then(blob => {
+
+        // Reset the button text and class
+        generateButton.innerText = 'Generate Report';
+        generateButton.classList.remove('generating'); // Remove the generating class
+        generateButton.disabled = false;
+
+        // Create a link to download the HTML report
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${companyName}_financial_report.html`;  // File name with company name
+        link.click();
+    })
+    .catch(error => {
+        console.error('Error generating the report:', error);
+        // Reset the button text and class in case of error
+        generateButton.innerText = 'Generate Report';
+        generateButton.classList.remove('generating'); // Remove the generating class
+        generateButton.disabled = false;
     });
 }
 
@@ -450,4 +517,93 @@ function resetContent() {
     document.getElementById('Worst_score').textContent = '--%';
     document.getElementById('Best_score_date').textContent = 'YYYY-MM-DD';
     document.getElementById('Worst_score_date').textContent = 'YYYY-MM-DD';
+}
+
+// Advanced Loading animation
+const processingStages = [
+    { icon: '🔗', text: "Scraping Links", description: "Collecting web resources...", stageDuration: 0.1 },
+    { icon: '🌐', text: "Resolving Links", description: "Validating and preparing links...", stageDuration: 0.1 },
+    { icon: '📄', text: "Extracting Article Content", description: "Pulling text from web pages...", stageDuration: 0.1 },
+    { icon: '🔍', text: "Analyzing Articles", description: "Processing textual insights...", stageDuration: 0.25 },
+    { icon: '📊', text: "Plotting Sentiment Scores", description: "Generating sentiment visualization...", stageDuration: 0.25 },
+    { icon: '✅', text: "Analysis Complete", description: "Finalizing results...", stageDuration: 0.2 }
+];
+
+const duration = 180000; // 3 minutes
+const loaderIcon = document.getElementById('loaderIcon');
+const stageText = document.getElementById('stageText');
+const stageDescription = document.getElementById('stageDescription');
+const overallProgressBar = document.getElementById('overallProgressBar');
+const overallProgressText = document.getElementById('overallProgressText');
+const stageProgressBar = document.getElementById('stageProgressBar');
+const stageProgressText = document.getElementById('stageProgressText');
+
+let progressInterval; // Declare a global variable to track the interval
+
+function clearLoader() {
+    // Reset progress bars and text to their initial state
+    overallProgressBar.style.width = '0%';
+    overallProgressText.textContent = '0%';
+    stageProgressBar.style.width = '0%';
+    stageProgressText.textContent = '0%';
+
+    // Reset loader icon and text
+    loaderIcon.textContent = '🔗';
+    stageText.textContent = 'Scraping Links';
+    stageDescription.textContent = 'Collecting web resources...';
+
+    // Clear any existing interval
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null; // Ensure no residual references
+    }
+}
+
+function updateLoader() {
+    clearLoader(); // Ensure previous intervals are cleared before starting a new one
+
+    const startTime = Date.now();
+
+    progressInterval = setInterval(() => {
+        const elapsedTime = Date.now() - startTime;
+        const calculatedOverallProgress = Math.min((elapsedTime / duration) * 100, 100);
+
+        const stageProgressPoints = processingStages.reduce((acc, stage, index) => {
+            const prevProgress = index === 0 ? 0 : acc[index - 1];
+            return [...acc, prevProgress + stage.stageDuration * 100];
+        }, []);
+
+        const currentStageIndex = stageProgressPoints.findIndex(
+            (point) => calculatedOverallProgress < point
+        );
+        const activeStage = currentStageIndex !== -1 ? currentStageIndex : processingStages.length - 1;
+
+        const currentStage = processingStages[activeStage];
+        loaderIcon.textContent = currentStage.icon;
+        stageText.textContent = currentStage.text;
+        stageDescription.textContent = currentStage.description;
+
+        const stageStartProgress = stageProgressPoints[activeStage - 1] || 0;
+        const stageEndProgress = stageProgressPoints[activeStage];
+        const currentStageTotalDuration = stageEndProgress - stageStartProgress;
+
+        const relativeProgress = Math.max(
+            0, 
+            Math.min(
+                100, 
+                ((calculatedOverallProgress - stageStartProgress) / currentStageTotalDuration) * 100
+            )
+        );
+
+        overallProgressBar.style.width = `${calculatedOverallProgress}%`;
+        overallProgressText.textContent = `${Math.round(calculatedOverallProgress)}%`;
+
+        stageProgressBar.style.width = `${relativeProgress}%`;
+        stageProgressText.textContent = `${Math.round(relativeProgress)}%`;
+
+        if (calculatedOverallProgress >= 100) {
+            clearInterval(progressInterval);
+            progressInterval = null; // Ensure no residual references
+        }
+    }, 100);
 }
